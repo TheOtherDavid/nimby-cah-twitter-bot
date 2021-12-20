@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	//"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -19,15 +18,12 @@ func main() {
 	fullMessage := message + cardMessage
 	fmt.Println(fullMessage)
 	//Send message to Twitter API
-	//createTweet(message)
+	SendTweet(fullMessage)
+
 	//Update env variable
 	newCardNumber := cardNumber + 1
 	os.Setenv("CARD_NUMBER", strconv.Itoa(newCardNumber))
 }
-
-/*func createTweet(message string) {
-
-}*/
 
 func getCardsList(fileName string) []string {
 	fileBytes, err := os.ReadFile(fileName)
