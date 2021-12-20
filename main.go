@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"os"
 	"strconv"
@@ -13,7 +14,7 @@ func main() {
 	//Import list of cards
 	cards := getCardsList("cards.txt")
 	//Get the right card
-	cardNumber, _ := strconv.Atoi(os.Getenv("CARD_NUMBER"))
+	cardNumber, _ := strconv.Atoi(getLastCardNumberFromFile("last_card.csv"))
 	cardMessage := cards[cardNumber]
 	fullMessage := message + cardMessage
 	fmt.Println(fullMessage)
@@ -22,7 +23,8 @@ func main() {
 
 	//Update env variable
 	newCardNumber := cardNumber + 1
-	os.Setenv("CARD_NUMBER", strconv.Itoa(newCardNumber))
+	writeLastCardNumberToFile("last_card.csv", strconv.Itoa(newCardNumber))
+
 }
 
 func getCardsList(fileName string) []string {
@@ -36,4 +38,40 @@ func getCardsList(fileName string) []string {
 	sliceData := strings.Split(string(fileBytes), "\r\n")
 
 	return sliceData
+}
+
+func getLastCardNumberFromFile(filename string) string {
+	file, err := os.Open(filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	records, err := csv.NewReader(file).ReadAll()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	lastCard := records[0][0]
+	return lastCard
+}
+
+func writeLastCardNumberToFile(filename string, lastCard string) {
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	lastCardArray := []string{lastCard}
+
+	err = writer.Write(lastCardArray)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }
