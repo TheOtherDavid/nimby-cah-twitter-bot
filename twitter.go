@@ -27,6 +27,23 @@ type User struct {
 }
 
 func CreateClient() *http.Client {
+	//Verify environment variables
+	if os.Getenv("CONSUMER_KEY") == "" {
+		fmt.Println("Consumer Key is not specified")
+		os.Exit(1)
+	}
+	if os.Getenv("CONSUMER_SECRET") == "" {
+		fmt.Println("Consumer Secret is not specified")
+		os.Exit(1)
+	}
+	if os.Getenv("TOKEN") == "" {
+		fmt.Println("Token is not specified")
+		os.Exit(1)
+	}
+	if os.Getenv("TOKEN_SECRET") == "" {
+		fmt.Println("Token Secret is not specified")
+		os.Exit(1)
+	}
 	//Create oauth client with consumer keys and access token
 	config := oauth1.NewConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET"))
 	token := oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKEN_SECRET"))
@@ -44,7 +61,8 @@ func SendTweet(tweet string) (*Tweet, error) {
 	client := CreateClient()
 	resp, err := client.PostForm("https://api.twitter.com/1.1/statuses/update.json", params)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer resp.Body.Close()
 	//Decode response and send out
@@ -52,7 +70,8 @@ func SendTweet(tweet string) (*Tweet, error) {
 	fmt.Println(string(body))
 	err = json.Unmarshal(body, &responseTweet)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	return &responseTweet, nil
 }
