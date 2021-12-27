@@ -23,6 +23,7 @@ func handleRequest() (string, error) {
 }
 
 func main() {
+	fmt.Println("Executing program on env " + os.Getenv("ENV"))
 	if os.Getenv("ENV") == "aws" {
 		lambda.Start(handleRequest)
 	} else {
@@ -36,8 +37,9 @@ func GenerateNIMBYTweet() {
 	//Import list of cards
 	cards := getCardsList("cards.txt")
 	//Get the right card
+	filePath := os.Getenv("FILE_PATH")
 	//cardNumber, _ := strconv.Atoi(getLastCardNumberFromFile("last_card.csv"))
-	cardNumber, _ := strconv.Atoi(getLastCardNumberFromS3("./tmp/last_card.csv"))
+	cardNumber, _ := strconv.Atoi(getLastCardNumberFromS3(filePath + "last_card.csv"))
 	cardMessage := cards[cardNumber]
 	fullMessage := message + cardMessage
 	fmt.Println(fullMessage)
@@ -47,7 +49,7 @@ func GenerateNIMBYTweet() {
 	//Update env variable
 	newCardNumber := cardNumber + 1
 
-	writeLastCardNumberToS3("./tmp/last_card.csv", strconv.Itoa(newCardNumber))
+	writeLastCardNumberToS3(filePath+"last_card.csv", strconv.Itoa(newCardNumber))
 	fmt.Println("File successfully updated")
 
 }
@@ -120,11 +122,17 @@ func getLastCardNumberFromS3(filename string) string {
 	}
 
 	lastCard := records[0][0]
+	fmt.Println("Retrieved", file.Name(), "from AWS")
+
 	return lastCard
 }
 
 func DownloadFromS3Bucket(filename string, bucket string) (os.File, error) {
+	fmt.Println("Creating file", filename)
+
 	file, err := os.Create(filename)
+	fmt.Println("File", file.Name(), "created")
+
 	if err != nil {
 		fmt.Println(err)
 	}
